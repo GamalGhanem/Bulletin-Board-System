@@ -4,7 +4,7 @@ import java.net.Socket;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Server extends Thread {
+public class Server {
 
     private static int clientNumber;
     private static AtomicInteger sequenceNumber;
