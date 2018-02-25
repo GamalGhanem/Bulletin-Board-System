@@ -27,8 +27,6 @@ public class Start {
         // start the server
         command.append("javac Server.java && java Server ");
         command.append(serverPort);
-        command.append(" ");
-        command.append(numberOfAccesses);
 
         sshHandler.execCommand("server", server, serverPort, serverPassword, command.toString());
 
@@ -67,6 +65,7 @@ public class Start {
             command.append(clientId + " ");
             command.append(numberOfAccesses + " ");
             command.append("Writer");
+            clientId++;
             sshHandler.execCommand(clientUserName, clientIp, serverPort, clientPassword, command.toString());
         }
 
