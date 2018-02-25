@@ -51,7 +51,7 @@ public class Start {
             command.append(serverPort + " ");
             command.append(clientId + " ");
             command.append(numberOfAccesses + " ");
-            command.append("read");
+            command.append("Reader");
             clientId++;
             sshHandler.execCommand(clientUserName, clientIp, serverPort, clientPassword, command.toString());
         }
@@ -66,7 +66,7 @@ public class Start {
             command.append(serverPort + " ");
             command.append(clientId + " ");
             command.append(numberOfAccesses + " ");
-            command.append("write");
+            command.append("Writer");
             sshHandler.execCommand(clientUserName, clientIp, serverPort, clientPassword, command.toString());
         }
 
