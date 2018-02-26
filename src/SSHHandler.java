@@ -1,16 +1,9 @@
 import com.jcraft.jsch.*;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- * This class will allow you to execute any command on a foreign computer
- * through SSH.
- */
 public class SSHHandler {
 
     public void execCommand(String userName, String ip, int port, String password, String command) {

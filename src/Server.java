@@ -113,7 +113,6 @@ public class Server {
                         readerLog.add(sSeq + "\t\t" + value + "\t\t" + clientID + "\t\t" + currentReader);
                     }
 
-                    // out.println(clientNumber + " " + current + value);
                 } else if (parts[0].equalsIgnoreCase("Writer")) {
 
                     synchronized (value) {
