@@ -22,7 +22,7 @@ public class Start {
         String numberOfAccesses = map.get("RW.numberOfAccesses");
         int readersNumber = Integer.parseInt(map.get("RW.numberOfReaders"));
         int writersNumber = Integer.parseInt(map.get("RW.numberOfWriters"));
-
+        int whileCount = Integer.parseInt(numberOfAccesses) * (readersNumber + writersNumber);
 
         StringBuilder command = new StringBuilder();
 
@@ -31,6 +31,8 @@ public class Start {
         // start the server
         command.append("javac Server.java && java Server ");
         command.append(serverPort);
+        command.append(" ");
+        command.append(whileCount);
 
         sshHandler.execCommand(serverUsername, serverIp, 22, serverPassword, command.toString());
 

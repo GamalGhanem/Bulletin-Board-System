@@ -26,30 +26,41 @@ public class Client {
 
     private void run() throws Exception{
 
-        Socket socket = new Socket(serverAddress, Integer.parseInt(portNumber));
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintWriter(socket.getOutputStream(), true);
-
         PrintWriter log = new PrintWriter(new File("log" + id + ".txt"));
         log.write("Client Type: " + type + "\n");
         log.write("Client Name: " + id + "\n");
-        log.write("rSeq\tsSeq\toVal\n");
+        if(type.equalsIgnoreCase("Reader")){
+            log.write("rSeq\tsSeq\toVal\n");
+        }else if(type.equalsIgnoreCase("Writer")){
+            log.write("rSeq\tsSeq\n");
+        }
 
         int accessCount = maxAccess;
         while(accessCount-- > 0){
+            Socket socket = new Socket(serverAddress, Integer.parseInt(portNumber));
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new PrintWriter(socket.getOutputStream(), true);
             if(type.equalsIgnoreCase("Reader")){
                 out.println(type + " " + id + " ");
             }else if(type.equalsIgnoreCase("Writer")){
-                String value = String.valueOf(new Random().nextInt(100));
+                String value = String.valueOf(new Random().nextInt(10));
+                System.out.println("value:: " + value);
                 out.println(type + " " + id + " " + value);
             }
 
-            final String response = in.readLine();
-            log.write(response + "\n");
+            final String rSeq = in.readLine();
+            final String sSeq = in.readLine();
+            final String value = in.readLine();
+            if(type.equalsIgnoreCase("Reader")){
+                log.write(rSeq + "\t" + sSeq + "\t" + value + "\n");
+            }else if(type.equalsIgnoreCase("Writer")){
+                log.write(rSeq + "\t" + sSeq + "\n");
+            }
 
             if(accessCount != 0){
                 Thread.sleep(new Random().nextInt(10000));
             }
+
         }
         log.close();
     }

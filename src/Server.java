@@ -1,31 +1,29 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server {
 
     private static int clientNumber;
-    private static AtomicInteger sequenceNumber;
-    private static int readersNumber;
-    private static int portNumber;
+    private static AtomicInteger rSeq, sSeq, readersNumber;
+    private static int portNumber, whileCount;
     private static ServerSocket socketListener;
     private static String value;
     private static Vector<String> readerLog;
     private static Vector<String> writerLog;
 
     public static void main(String[] args) throws Exception {
-        if(args == null || args.length != 1){
-            System.err.println("Missing Args");
-            return;
-        }
 
         System.out.println("The Server Starts Now...");
 
         clientNumber = 0;
-        readersNumber = 0;
-        sequenceNumber = new AtomicInteger(1);
+        readersNumber = new AtomicInteger(0);
+        rSeq = new AtomicInteger(1);
+        sSeq = new AtomicInteger(1);
         readerLog = new Vector<>();
         writerLog = new Vector<>();
         readerLog.add("Readers");
@@ -34,7 +32,10 @@ public class Server {
         writerLog.add("sSeq\t\toVal\t\twID");
 
         portNumber = Integer.parseInt(args[0]);
+        whileCount = Integer.parseInt(args[1]);
         value = "-1";
+
+        ArrayList<Thread> threads = new ArrayList<>();
 
         try{
             socketListener = new ServerSocket(portNumber);
@@ -43,10 +44,18 @@ public class Server {
         }
 
         try{
-            while(true){
+            while(whileCount-- > 0){
                 Socket socket = socketListener.accept();
-                new RequestHandler(socket, clientNumber++).start();
+                Thread thread = new Thread(new RequestHandler(socket, clientNumber++));
+                thread.start();
+                threads.add(thread);
             }
+
+            for(Thread thread: threads){
+                thread.join();
+            }
+
+
         } catch (Exception e){
             System.out.println(e.getMessage());
         } finally {
@@ -61,13 +70,15 @@ public class Server {
                 }
                 log.close();
                 socketListener.close();
+
+                System.out.println("The Server Ends Now...");
             }catch (Exception e) {
                 System.out.println(e.getMessage());
             }
         }
     }
 
-    private static class RequestHandler extends Thread{
+    private static class RequestHandler implements Runnable{
 
         private Socket socket;
         private int clientNumber;
@@ -75,10 +86,10 @@ public class Server {
         public RequestHandler(Socket socket, int clientNumber){
             this.socket = socket;
             this.clientNumber = clientNumber;
-            System.out.println("New connection with client# " + clientNumber + "on socket: " + socket);
+            System.out.println("New connection with client# " + clientNumber + " on socket: " + socket);
         }
 
-
+        @Override
         public void run() {
             try{
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -86,17 +97,35 @@ public class Server {
                 String line = in.readLine();
                 String[] parts = line.split(" ");
                 Integer clientID = Integer.valueOf(parts[1]);
+
+                synchronized (rSeq){
+                    int currentRseq = rSeq.getAndIncrement();
+                    out.println(currentRseq);
+                }
+
+                Thread.sleep(new Random().nextInt(10000));
+
                 if(parts[0].equalsIgnoreCase("Reader")){
                     // write in the read vector
-                    readersNumber++;
-                    int current = sequenceNumber.getAndIncrement();
-                    readerLog.add(current + "\t\t" + value + "\t\t" + clientID + "\t\t" + readersNumber);
-                    out.println(clientNumber + " " + current + value);
+
+                    synchronized (readersNumber){
+                        int currentReader = readersNumber.incrementAndGet();
+                        readerLog.add(sSeq + "\t\t" + value + "\t\t" + clientID + "\t\t" + currentReader);
+                    }
+
+                    // out.println(clientNumber + " " + current + value);
                 }else if(parts[0].equalsIgnoreCase("Writer")){
-                    value = parts[2];
-                    int current = sequenceNumber.getAndIncrement();
-                    writerLog.add(current + "\t\t" + value + "\t\t" + clientID);
-                    out.println(clientNumber + " " + current);
+
+                    synchronized (value){
+                        value = parts[2];
+                        writerLog.add(sSeq + "\t\t" + value + "\t\t" + clientID);
+                    }
+                }
+
+                synchronized (sSeq){
+                    int currentSseq = sSeq.getAndIncrement();
+                    out.println(currentSseq);
+                    out.println(value);
                 }
             }catch (Exception e){
                 System.out.println(e.getMessage());
@@ -106,7 +135,7 @@ public class Server {
                 } catch (IOException e){
                     System.out.println("Couldn't close the socket");
                 }
-                System.out.println("Client# " + clientNumber + "connection now closed");
+                System.out.println("Client# " + clientNumber + " connection now closed");
             }
         }
     }
