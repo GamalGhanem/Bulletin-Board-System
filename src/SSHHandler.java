@@ -13,11 +13,11 @@ import java.util.logging.Logger;
  */
 public class SSHHandler {
 
-    public void execCommand(String userName, String ip, int port, String password, String command){
+    public void execCommand(String userName, String ip, int port, String password, String command) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try{
+                try {
                     JSch.setConfig("StrictHostKeyChecking", "no");
                     JSch jsch = new JSch();
                     Session session = jsch.getSession(userName, ip, port);
@@ -34,16 +34,16 @@ public class SSHHandler {
                     printStream.println(command);
 
                     byte[] temp = new byte[1024];
-                    while(true){
-                        while(commandOutput.available() > 0){
+                    while (true) {
+                        while (commandOutput.available() > 0) {
                             int readByte = commandOutput.read(temp, 0, 1024);
-                            if(readByte < 0){
+                            if (readByte < 0) {
                                 break;
                             }
                             System.out.println(new String(temp, 0, readByte));
                         }
-                        if(channel.isClosed()){
-                            if(commandOutput.available() > 0){
+                        if (channel.isClosed()) {
+                            if (commandOutput.available() > 0) {
                                 continue;
                             }
                             System.out.println("exit-status: " + channel.getExitStatus());

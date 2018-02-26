@@ -4,14 +4,14 @@ public class Start {
 
     private static final String configFile = "system.properties";
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         Parser parser = new Parser();
         HashMap<String, String> properties = parser.parse(configFile);
 
         start(properties);
     }
 
-    private static void start(HashMap<String, String> map){
+    private static void start(HashMap<String, String> map) {
         String[] parts = getNameAndIp(map.get("RW.server"));
         String serverUsername = parts[0].trim();
         String serverIp = parts[1].trim();
@@ -37,15 +37,15 @@ public class Start {
         sshHandler.execCommand(serverUsername, serverIp, 22, serverPassword, command.toString());
 
 
-        try{
+        try {
             Thread.sleep(3000);
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         // start the clients
         int clientId = 1;
-        for(int i = 0; i < readersNumber; i++){
+        for (int i = 0; i < readersNumber; i++) {
             String[] clientParts = getNameAndIp(map.get("RW.reader" + i));
             String clientUserName = clientParts[0].trim();
             String clientIp = clientParts[1].trim();
@@ -61,7 +61,7 @@ public class Start {
             sshHandler.execCommand(clientUserName, clientIp, 22, clientPassword, command.toString());
         }
 
-        for(int i = 0; i < writersNumber; i++){
+        for (int i = 0; i < writersNumber; i++) {
             String[] clientParts = getNameAndIp(map.get("RW.writer" + i));
             String clientUserName = clientParts[0].trim();
             String clientIp = clientParts[1].trim();
@@ -79,7 +79,7 @@ public class Start {
 
     }
 
-    private static String[] getNameAndIp(String str){
+    private static String[] getNameAndIp(String str) {
         String[] parts = str.split("@");
         return parts;
     }

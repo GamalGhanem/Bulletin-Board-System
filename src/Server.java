@@ -37,53 +37,53 @@ public class Server {
 
         ArrayList<Thread> threads = new ArrayList<>();
 
-        try{
+        try {
             socketListener = new ServerSocket(portNumber);
-        }catch (IOException e){
+        } catch (IOException e) {
             System.out.println(e.getMessage());
         }
 
-        try{
-            while(whileCount-- > 0){
+        try {
+            while (whileCount-- > 0) {
                 Socket socket = socketListener.accept();
                 Thread thread = new Thread(new RequestHandler(socket, clientNumber++));
                 thread.start();
                 threads.add(thread);
             }
 
-            for(Thread thread: threads){
+            for (Thread thread : threads) {
                 thread.join();
             }
 
 
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         } finally {
             // print the file here
-            try{
+            try {
                 PrintWriter log = new PrintWriter(new File("server.txt"));
-                for(String line: readerLog){
+                for (String line : readerLog) {
                     log.write(line + "\n");
                 }
-                for(String line: writerLog){
+                for (String line : writerLog) {
                     log.write(line + "\n");
                 }
                 log.close();
                 socketListener.close();
 
                 System.out.println("The Server Ends Now...");
-            }catch (Exception e) {
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
         }
     }
 
-    private static class RequestHandler implements Runnable{
+    private static class RequestHandler implements Runnable {
 
         private Socket socket;
         private int clientNumber;
 
-        public RequestHandler(Socket socket, int clientNumber){
+        public RequestHandler(Socket socket, int clientNumber) {
             this.socket = socket;
             this.clientNumber = clientNumber;
             System.out.println("New connection with client# " + clientNumber + " on socket: " + socket);
@@ -91,48 +91,48 @@ public class Server {
 
         @Override
         public void run() {
-            try{
+            try {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 String line = in.readLine();
                 String[] parts = line.split(" ");
                 Integer clientID = Integer.valueOf(parts[1]);
 
-                synchronized (rSeq){
+                synchronized (rSeq) {
                     int currentRseq = rSeq.getAndIncrement();
                     out.println(currentRseq);
                 }
 
                 Thread.sleep(new Random().nextInt(10000));
 
-                if(parts[0].equalsIgnoreCase("Reader")){
+                if (parts[0].equalsIgnoreCase("Reader")) {
                     // write in the read vector
 
-                    synchronized (readersNumber){
+                    synchronized (readersNumber) {
                         int currentReader = readersNumber.incrementAndGet();
                         readerLog.add(sSeq + "\t\t" + value + "\t\t" + clientID + "\t\t" + currentReader);
                     }
 
                     // out.println(clientNumber + " " + current + value);
-                }else if(parts[0].equalsIgnoreCase("Writer")){
+                } else if (parts[0].equalsIgnoreCase("Writer")) {
 
-                    synchronized (value){
+                    synchronized (value) {
                         value = parts[2];
                         writerLog.add(sSeq + "\t\t" + value + "\t\t" + clientID);
                     }
                 }
 
-                synchronized (sSeq){
+                synchronized (sSeq) {
                     int currentSseq = sSeq.getAndIncrement();
                     out.println(currentSseq);
                     out.println(value);
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 System.out.println(e.getMessage());
             } finally {
-                try{
+                try {
                     socket.close();
-                } catch (IOException e){
+                } catch (IOException e) {
                     System.out.println("Couldn't close the socket");
                 }
                 System.out.println("Client# " + clientNumber + " connection now closed");
