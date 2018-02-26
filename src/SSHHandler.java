@@ -2,6 +2,8 @@ import com.jcraft.jsch.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,19 +18,20 @@ public class SSHHandler {
             @Override
             public void run() {
                 try{
+                    JSch.setConfig("StrictHostKeyChecking", "no");
                     JSch jsch = new JSch();
                     Session session = jsch.getSession(userName, ip, port);
                     session.setPassword(password);
-                    session.setConfig("StrictHostKeyChecking", "no");
-                    session.setX11Host(ip);
-                    session.setX11Port(6000);
                     session.connect();
 
-                    ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
-                    channelExec.setCommand(command);
-                    channelExec.setErrStream(System.err);
-                    channelExec.connect();
-                    InputStream commandOutput = channelExec.getInputStream();
+                    Channel channel = session.openChannel("shell");
+                    channel.connect();
+
+                    OutputStream output = channel.getOutputStream();
+                    PrintStream printStream = new PrintStream(output, true);
+                    InputStream commandOutput = channel.getInputStream();
+
+                    printStream.println(command);
 
                     byte[] temp = new byte[1024];
                     while(true){
@@ -39,16 +42,17 @@ public class SSHHandler {
                             }
                             System.out.println(new String(temp, 0, readByte));
                         }
-                        if(channelExec.isClosed()){
+                        if(channel.isClosed()){
                             if(commandOutput.available() > 0){
                                 continue;
                             }
-                            System.out.println("exit-status: " + channelExec.getExitStatus());
+                            System.out.println("exit-status: " + channel.getExitStatus());
                             break;
                         }
                     }
-                    channelExec.disconnect();
-                } catch (IOException | JSchException e){
+                    channel.disconnect();
+                    session.disconnect();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
