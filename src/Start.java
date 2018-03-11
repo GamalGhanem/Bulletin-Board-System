@@ -16,7 +16,7 @@ public class Start {
         String serverUsername = parts[0].trim();
         String serverIp = parts[1].trim();
 
-        int serverPort = Integer.parseInt(map.get("RW.server.port"));
+        int rmiPort = Integer.parseInt(map.get("RW.rmiregistry.port"));
 
         String serverPassword = map.get("RW.server.pwd");
         String numberOfAccesses = map.get("RW.numberOfAccesses");
@@ -30,9 +30,11 @@ public class Start {
 
         // start the server
         command.append("javac Server.java && java Server ");
-        command.append(serverPort);
+        command.append(rmiPort);
         command.append(" ");
         command.append(whileCount);
+        command.append(" ");
+        command.append(serverIp);
 
         sshHandler.execCommand(serverUsername, serverIp, 22, serverPassword, command.toString());
 
@@ -53,7 +55,7 @@ public class Start {
             command = new StringBuilder();
             command.append("javac Client.java && java Client ");
             command.append(serverIp + " ");
-            command.append(serverPort + " ");
+            command.append(rmiPort + " ");
             command.append(clientId + " ");
             command.append(numberOfAccesses + " ");
             command.append("Reader");
@@ -69,7 +71,7 @@ public class Start {
             command = new StringBuilder();
             command.append("javac Client.java && java Client ");
             command.append(serverIp + " ");
-            command.append(serverPort + " ");
+            command.append(rmiPort + " ");
             command.append(clientId + " ");
             command.append(numberOfAccesses + " ");
             command.append("Writer");
