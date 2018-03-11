@@ -29,7 +29,7 @@ public class Start {
         SSHHandler sshHandler = new SSHHandler();
 
         // start the server
-        command.append("javac Server.java && java Server ");
+        command.append("javac *.java && java Server ");
         command.append(rmiPort);
         command.append(" ");
         command.append(whileCount);
@@ -53,7 +53,7 @@ public class Start {
             String clientIp = clientParts[1].trim();
             String clientPassword = map.get("RW.reader" + i + ".pwd");
             command = new StringBuilder();
-            command.append("javac Client.java && java Client ");
+            command.append("javac *.java && java Client ");
             command.append(serverIp + " ");
             command.append(rmiPort + " ");
             command.append(clientId + " ");
@@ -69,7 +69,7 @@ public class Start {
             String clientIp = clientParts[1].trim();
             String clientPassword = map.get("RW.writer" + i + ".pwd");
             command = new StringBuilder();
-            command.append("javac Client.java && java Client ");
+            command.append("javac *.java && java Client ");
             command.append(serverIp + " ");
             command.append(rmiPort + " ");
             command.append(clientId + " ");

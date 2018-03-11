@@ -1,8 +1,5 @@
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Random;
@@ -81,7 +78,7 @@ public class Client {
         System.setProperty("java.rmi.server.hostname", serverAddress);
 
         String name = "Board";
-        Registry registry = LocateRegistry.getRegistry(serverAddress, portNumber);
+        Registry registry = LocateRegistry.getRegistry(portNumber);
         RemoteHandle handle = (RemoteHandle) registry.lookup(name);
 
         System.out.println("Welcome Client No. " + id);

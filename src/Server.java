@@ -1,21 +1,14 @@
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Server extends UnicastRemoteObject implements RemoteHandle {
+public class Server implements RemoteHandle {
 
-    private static int clientNumber;
     private static AtomicInteger rSeq, sSeq, readersNumber;
-    private static int portNumber, whileCount;
-    private static ServerSocket socketListener;
+    private static int portNumber;
     private static String value, serverIp;
     private static BufferedWriter readerLog;
     private static BufferedWriter writerLog;
@@ -23,7 +16,6 @@ public class Server extends UnicastRemoteObject implements RemoteHandle {
     protected Server() throws Exception {
         super();
 
-        clientNumber = 0;
         readersNumber = new AtomicInteger(0);
         rSeq = new AtomicInteger(1);
         sSeq = new AtomicInteger(1);
@@ -46,16 +38,17 @@ public class Server extends UnicastRemoteObject implements RemoteHandle {
         System.out.println("The Server Starts Now...");
 
         portNumber = Integer.parseInt(args[0]);
-        whileCount = Integer.parseInt(args[1]);
         serverIp = args[2];
 
         System.setProperty("java.rmi.server.hostname", serverIp);
         String name = "Board";
         Server server = new Server();
 
+        RemoteHandle stub = (RemoteHandle) UnicastRemoteObject.exportObject(server, portNumber);
+
         Registry registry = LocateRegistry.createRegistry(portNumber);
 
-        registry.rebind(name, server);
+        registry.bind(name, stub);
 
         System.out.println("Server now on port " + portNumber + "...");
 
