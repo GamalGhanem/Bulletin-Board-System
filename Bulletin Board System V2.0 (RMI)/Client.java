@@ -78,7 +78,7 @@ public class Client {
         System.setProperty("java.rmi.server.hostname", serverAddress);
 
         String name = "Board";
-        Registry registry = LocateRegistry.getRegistry(portNumber);
+        Registry registry = LocateRegistry.getRegistry(serverAddress, portNumber);
         RemoteHandle handle = (RemoteHandle) registry.lookup(name);
 
         System.out.println("Welcome Client No. " + id);
